@@ -3,3 +3,4 @@
 *.png binary
 *.class binary
 gradle/wrapper/gradle-wrapper.jar binary
+*.bat text eol=crlf
