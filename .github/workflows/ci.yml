@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  java:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check out FerroLoom (the shim and runtime this API compiles against)
+        uses: actions/checkout@v7
+        with:
+          repository: enderliker/FerroLoom
+          path: FerroLoom
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Fetch FerroLoom's embedded runtime
+        run: ./FerroLoom/tools/fetch-runtime.sh
+      - name: Build and test
+        env:
+          FERROLOOM_REPO: ${{ github.workspace }}/FerroLoom
+        run: ./build.sh test

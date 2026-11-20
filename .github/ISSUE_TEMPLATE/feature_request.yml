@@ -1,0 +1,32 @@
+name: Module request
+description: A Fabric mod needs an API module or member that is not present
+labels: [enhancement]
+body:
+  - type: textarea
+    id: mod
+    attributes:
+      label: Which mod needs it?
+      description: Name, version, source URL and the exact API classes or members it calls.
+    validations:
+      required: true
+  - type: textarea
+    id: surface
+    attributes:
+      label: API surface needed
+      description: The Fabric API module, classes and methods, with the javap lines if you have them.
+    validations:
+      required: true
+  - type: textarea
+    id: engine
+    attributes:
+      label: Engine hooks needed
+      description: Any game method, event or value the module requires from FerroLoom/Horizon. If a mixin is involved, name the target.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: markdown
+    attributes:
+      value: |
+        Reminder: no Mojang code. Proposals based on the official jar's behavior must describe it,
+        not paste it.

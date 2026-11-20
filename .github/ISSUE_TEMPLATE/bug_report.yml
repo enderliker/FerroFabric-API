@@ -1,0 +1,61 @@
+name: Bug report
+description: A Fabric mod does not work with FerroFabric-API as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste your Microsoft account details or a full world. A log excerpt is enough.
+  - type: input
+    id: version
+    attributes:
+      label: FerroFabric-API version / commit
+      placeholder: e.g. 26.3-ferro.1 or a commit hash
+    validations:
+      required: true
+  - type: input
+    id: ferroloom
+    attributes:
+      label: FerroLoom version / commit
+      placeholder: e.g. master at db66b4e
+    validations:
+      required: true
+  - type: input
+    id: horizon
+    attributes:
+      label: Horizon build
+      placeholder: e.g. nightly-2026-11-19-5ef7734
+    validations:
+      required: true
+  - type: input
+    id: java
+    attributes:
+      label: JDK
+      placeholder: e.g. Temurin 25.0.1
+    validations:
+      required: true
+  - type: textarea
+    id: mod
+    attributes:
+      label: Mod involved
+      description: Name, version, source URL and the API classes it calls (javap output welcome). Do not attach jars you cannot share.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log excerpt
+      description: The relevant lines from ~/.local/share/horizon/ferroloom.log, including any FerroUnimplementedException.
+      render: text

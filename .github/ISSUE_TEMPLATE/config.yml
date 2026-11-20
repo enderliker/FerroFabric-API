@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: FerroLoom design and plans
+    url: https://github.com/enderliker/FerroLoom/tree/master/docs
+    about: Read the design spec (especially §6.1 and §6.8) before proposing a large change.
+  - name: FerroLoom issues
+    url: https://github.com/enderliker/FerroLoom/issues
+    about: The host, the shim, the loader and the engine bridge live there.
