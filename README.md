@@ -72,5 +72,6 @@ Certificate of Origin; the code is Apache-2.0.
 Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE). Why Apache-2.0: Fabric API,
 whose public interface this project implements and whose modules it may later port, is
 Apache-2.0. That keeps the porting path unambiguous, includes an explicit patent grant, and is
-compatible with FerroLoom's MIT licence. This release contains no Fabric API source code; only its
-documented public package and class names are used.
+compatible with FerroLoom's MIT licence. The event system is adapted from Fabric API under the
+Apache License 2.0 (see [NOTICE](NOTICE)); the rest is original code implementing its published
+interfaces.

@@ -4,8 +4,12 @@ Copyright 2026 FerroLoom contributors
 This product implements the public interfaces of Fabric API
 (https://github.com/FabricMC/fabric-api), which is licensed under the
 Apache License, Version 2.0. The package and class names in this project
-are Fabric API's documented public API surface. No Fabric API source code
-is included in this release.
+are Fabric API's documented public API surface.
+
+Portions of the event system (net.fabricmc.fabric.api.event,
+net.fabricmc.fabric.api.util and net.fabricmc.fabric.impl.base) are
+adapted from Fabric API, Copyright (c) 2016, 2017, 2018, 2019 FabricMC,
+licensed under the Apache License, Version 2.0.
 
 FerroLoom (https://github.com/enderliker/FerroLoom) is a separate work
 licensed under the MIT License; this project is loaded by it at runtime.

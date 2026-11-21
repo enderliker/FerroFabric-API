@@ -18,15 +18,18 @@ import org.junit.jupiter.api.Test;
 
 class FabricApiTest {
     @Test
-    void an_event_dispatches_every_registered_listener() {
-        Event<Double> event = new Event<>() {};
-        List<Double> seen = new ArrayList<>();
-        event.register(1.0);
-        event.register(2.0);
+    void an_event_calls_every_registered_listener() {
+        Event<Runnable> event = net.fabricmc.fabric.api.event.EventFactory.createArrayBacked(
+                Runnable.class, listeners -> () -> {
+                    for (Runnable listener : listeners) listener.run();
+                });
+        List<String> seen = new ArrayList<>();
+        event.register(() -> seen.add("a"));
+        event.register(() -> seen.add("b"));
 
-        event.dispatch(seen::add);
+        event.invoker().run();
 
-        assertEquals(List.of(1.0, 2.0), seen);
+        assertEquals(List.of("a", "b"), seen);
     }
 
     @Test
