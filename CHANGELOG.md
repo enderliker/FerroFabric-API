@@ -5,6 +5,22 @@ All notable changes to FerroFabric-API. The version number follows the FerroLoom
 
 ## [Unreleased]
 
+### Added
+
+- `fabric-message-api-v1`: `ClientSendMessageEvents` (ALLOW_CHAT, MODIFY_CHAT, ALLOW_COMMAND,
+  MODIFY_COMMAND and their notify/cancelled events) and `ClientReceiveMessageEvents` (ALLOW_GAME,
+  MODIFY_GAME, GAME, ALLOW_CHAT, CHAT and their cancelled events), fired from the engine's
+  `client_chat` and `client_chat_received` hooks. A line starting with `/` uses the command
+  events. The sender is null, a chat line is plain text, and a modified game message is plain
+  text too (styles are lost).
+- The shim now models `Component`/`MutableComponent` (`literal`, `empty`, `getString`, `copy`,
+  `append`), a minimal `PlayerChatMessage` and `ChatType.Bound`.
+
+### Changed
+
+- Nested game types are named by their binary name in the API source (`ChatType$Bound`), because
+  the generated shim carries no `InnerClasses` attribute; the descriptors match upstream.
+
 ## [26.3-ferro.1] — 2026-11-20
 
 First release, with the modules FerroLoom Plan 3 needs to run an unmodified third-party zoom mod.

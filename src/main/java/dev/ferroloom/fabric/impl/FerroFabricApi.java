@@ -1,18 +1,28 @@
 package dev.ferroloom.fabric.impl;
 
 import dev.ferroloom.api.FerroEvents;
+import dev.ferroloom.shim.ShimImpl;
 import dev.ferroloom.shim.ShimRuntime;
+import java.time.Instant;
+import java.util.UUID;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.ChatType$Bound;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 
 /**
  * The glue between FerroLoom's engine hooks and the API's events. FerroBootstrap calls these
  * reflectively; they are safe to call more than once.
  */
 public final class FerroFabricApi {
+    private static final UUID NIL_UUID = new UUID(0, 0);
+
     private static final FerroEvents.TickListener FORWARD_TICK = (tick, x, y, z) -> {
         ClientTickEvents.fireStart();
         ClientLevel level = ShimRuntime.level();
@@ -23,12 +33,84 @@ public final class FerroFabricApi {
         ClientTickEvents.fireEnd();
     };
 
+    /**
+     * The engine reports a raw line; a leading slash makes it a command, as upstream's send path
+     * does. A cancelled line does not reach MODIFY_* or the notify events.
+     */
+    private static final FerroEvents.ChatSendListener FORWARD_SEND = message -> {
+        if (message.startsWith("/")) {
+            if (!ClientSendMessageEvents.ALLOW_COMMAND.invoker().allowSendCommandMessage(message)) {
+                ClientSendMessageEvents.COMMAND_CANCELED.invoker()
+                        .onSendCommandMessageCanceled(message);
+                return null;
+            }
+            String modified =
+                    ClientSendMessageEvents.MODIFY_COMMAND.invoker().modifySendCommandMessage(message);
+            ClientSendMessageEvents.COMMAND.invoker().onSendCommandMessage(modified);
+            return modified;
+        }
+        if (!ClientSendMessageEvents.ALLOW_CHAT.invoker().allowSendChatMessage(message)) {
+            ClientSendMessageEvents.CHAT_CANCELED.invoker().onSendChatMessageCanceled(message);
+            return null;
+        }
+        String modified = ClientSendMessageEvents.MODIFY_CHAT.invoker().modifySendChatMessage(message);
+        ClientSendMessageEvents.CHAT.invoker().onSendChatMessage(modified);
+        return modified;
+    };
+
+    /**
+     * A system message fires the game-message events, a player line the chat events, as upstream
+     * does. The engine has no profile for the sender, so it is null; modifying a game message
+     * returns plain text and loses its styles (recorded in docs/compatibility.md).
+     */
+    private static final FerroEvents.ChatReceiveListener FORWARD_RECEIVE = event -> {
+        Component message = Component.literal(event.message);
+        if (event.system) {
+            if (!ClientReceiveMessageEvents.ALLOW_GAME.invoker()
+                    .allowReceiveGameMessage(message, event.overlay)) {
+                ClientReceiveMessageEvents.GAME_CANCELED.invoker()
+                        .onReceiveGameMessageCanceled(message, event.overlay);
+                event.cancel = true;
+                return;
+            }
+            Component modified = ClientReceiveMessageEvents.MODIFY_GAME.invoker()
+                    .modifyReceivedGameMessage(message, event.overlay);
+            ClientReceiveMessageEvents.GAME.invoker()
+                    .onReceiveGameMessage(modified, event.overlay);
+            String text = modified.getString();
+            if (!text.equals(event.message)) {
+                event.modified = text;
+            }
+            return;
+        }
+        PlayerChatMessage playerMessage = event.hasPlayerMessage
+                ? PlayerChatMessage.unsigned(NIL_UUID, event.playerBody)
+                : null;
+        ChatType$Bound bound = event.chatType == null ? null : ShimImpl.chatTypeBound(event.chatType);
+        Instant timeStamp = Instant.ofEpochMilli(event.timestampMillis);
+        if (!ClientReceiveMessageEvents.ALLOW_CHAT.invoker()
+                .allowReceiveChatMessage(message, playerMessage, null, bound, timeStamp)) {
+            ClientReceiveMessageEvents.CHAT_CANCELED.invoker()
+                    .onReceiveChatMessageCanceled(message, playerMessage, null, bound, timeStamp);
+            event.cancel = true;
+            return;
+        }
+        ClientReceiveMessageEvents.CHAT.invoker()
+                .onReceiveChatMessage(message, playerMessage, null, bound, timeStamp);
+    };
+
     private FerroFabricApi() {}
 
     public static void init() {
         // Membership rather than a flag: a test or reload may clear FerroEvents first.
         if (!FerroEvents.TICKS.contains(FORWARD_TICK)) {
             FerroEvents.onClientTick(FORWARD_TICK);
+        }
+        if (!FerroEvents.CHAT_SEND.contains(FORWARD_SEND)) {
+            FerroEvents.onChatSend(FORWARD_SEND);
+        }
+        if (!FerroEvents.CHAT_RECEIVED.contains(FORWARD_RECEIVE)) {
+            FerroEvents.onChatReceived(FORWARD_RECEIVE);
         }
     }
 

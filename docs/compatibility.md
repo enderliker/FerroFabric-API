@@ -9,9 +9,10 @@ this page is the API's view.
 
 | Module | Public classes | Notes |
 |---|---|---|
-| `fabric-event` | `net.fabricmc.fabric.api.event.Event` | `register(T)`; `dispatch(Consumer<T>)` added for modules. No `invoker()` factory. A failing listener is logged and the others run. |
-| `fabric-key-binding-api-v1` | `net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper` | `registerKeyMapping(KeyMapping)` registers with the engine's `Registrar`. Constructor registration and the helper are idempotent per (mod, key). |
-| `fabric-lifecycle-events-v1` | `net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents` | `END_CLIENT_TICK` only, fired from the engine tick after the key state is pushed. |
+| `fabric-api-base` | `Event`, `EventFactory`, `AutoInvokingEvent`, `TriState`, `EventResult`, `BooleanFunction`, `NbtType` | The real event system: `invoker()`, `register(T)`, phases and `addPhaseOrdering`, adapted from Fabric API. A throwing listener is logged and the others still run. |
+| `fabric-key-binding-api-v1` | `net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper` | `registerKeyMapping` registers with the engine's `Registrar` and throws on a duplicate; `getBoundKeyOf` returns the player's Controls binding, pushed by the engine each tick. |
+| `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE, fired from the engine hooks. |
+| `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. |
 
 ## Behaviour differences that a mod can notice
 
@@ -29,15 +30,23 @@ this page is the API's view.
 5. **Key codes are 26.3 SDL/HID scancodes.** `InputConstants.KEY_C` is 6, not GLFW's 67. The API
    converts them to Horizon key names; a mod that hardcodes GLFW numbers will ask for the wrong
    key.
-6. **`Event` has no listener priorities or phases.** Registration order is dispatch order.
+6. **Message events carry plain text and no sender.** The engine's hook reports a component tree
+   and a sender UUID; the bridge passes the flattened text and a null `GameProfile`. A
+   `PlayerChatMessage` carries the signed body and the signature flag only, and
+   `ChatType.Bound.chatType()` is null (the name is the registry name the engine reported).
+   `MODIFY_GAME` returns text, so the replacement line loses the original styles. A line that
+   starts with `/` uses the command events, as upstream's send path does.
+7. **Nested game types are named by their binary name in this project's source**
+   (`ChatType$Bound`). The generated shim omits the `InnerClasses` attribute, so Java cannot
+   write `ChatType.Bound`; the compiled descriptor is the same.
 
 ## Not present yet
 
 `fabric-screen-api-v1`, `fabric-rendering-v1`, `fabric-item-api-v1`,
 `fabric-item-group-api-v1`, `fabric-object-builder-api-v1`, `fabric-registry-sync-v0`,
-`fabric-resource-loader-v0`, `fabric-client-tags-api-v1`, `fabric-transfer-api-v1`, networking
-events, `START_CLIENT_TICK`, world load/unload and every server-side event. The order is in
-FerroLoom's design §6.1 and §6.8; the full fork is Plan 4.
+`fabric-resource-loader-v1`, `fabric-client-tags-api-v1`, `fabric-transfer-api-v1`, networking
+events, client-level entity/chunk events and every server-side event. The order is in FerroLoom's
+design §6.1 and §6.8; the full fork is Plan 4.
 
 ## Targets checked
 

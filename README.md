@@ -25,6 +25,7 @@ class path through `-Dferro.apiJar` and lists the builtins in `getBuiltinMods`.
 | `fabric-api-base` | `Event`, `EventFactory`, `TriState`, `EventResult` | The real event system: `invoker()`, `register(T)`, phases and `addPhaseOrdering`, ported from Fabric API. |
 | `fabric-key-binding-api-v1` | `KeyMappingHelper` | `registerKeyMapping` registers with the engine's `Registrar` (duplicate throws); `getBoundKeyOf` returns the player's Controls binding, pushed by the engine each tick. |
 | `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE. Fired from the engine hooks after the pushed key state. |
+| `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send (allow/modify, chat and command) and receive (allow, modify game, chat/game notify) events, fired from the engine's chat hooks. Plain text only: styles are lost and the sender is null. |
 
 The full Fabric API fork is the roadmap. A module enters when a target mod needs it and its
 classes compile against the shim; what is missing is listed in
