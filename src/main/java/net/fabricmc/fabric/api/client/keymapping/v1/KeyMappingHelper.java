@@ -1,5 +1,6 @@
 package net.fabricmc.fabric.api.client.keymapping.v1;
 
+import com.mojang.blaze3d.platform.InputConstants$Key;
 import net.minecraft.client.KeyMapping;
 
 /**
@@ -11,5 +12,10 @@ public final class KeyMappingHelper {
 
     public static KeyMapping registerKeyMapping(KeyMapping keyMapping) {
         return dev.ferroloom.shim.ShimImpl.ensureRegistered(keyMapping);
+    }
+
+    /** The key the player's Controls binding names, or the declared default. */
+    public static InputConstants$Key getBoundKeyOf(KeyMapping keyMapping) {
+        return dev.ferroloom.shim.ShimImpl.boundKey(keyMapping);
     }
 }

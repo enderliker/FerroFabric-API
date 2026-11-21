@@ -14,9 +14,10 @@ First release, with the modules FerroLoom Plan 3 needs to run an unmodified thir
 - `fabric-api-base`: the real `Event`/`EventFactory` with `invoker()`, phases and phase ordering,
   plus `AutoInvokingEvent`, `TriState`, `EventResult`, `BooleanFunction` and `NbtType` (adapted
   from Fabric API, Apache-2.0).
-- `fabric-key-binding-api-v1`: `KeyMappingHelper.registerKeyMapping`, mapping a `KeyMapping` to
-  the engine's `Registrar` (translation key to `<mod>_<key>`, 26.3 SDL/HID scancode to a Horizon
-  key name). The key is rebindable in Options > Controls.
+- `fabric-key-binding-api-v1`: `KeyMappingHelper.registerKeyMapping` (explicit, duplicate throws)
+  and `getBoundKeyOf` (the player's Controls binding), mapping a `KeyMapping` to the engine's
+  `Registrar` (translation key to `<mod>_<key>`, 26.3 SDL/HID scancode to a Horizon key name).
+  The key is rebindable in Options > Controls.
 - `fabric-lifecycle-events-v1`: `ClientTickEvents` with START/END client tick and level tick,
   `ClientLifecycleEvents` (CLIENT_STARTED/CLIENT_STOPPING) and `ClientLevelEvents`
   (AFTER_CLIENT_LEVEL_CHANGE), fired from the engine's client hooks.
