@@ -12,18 +12,19 @@ classes those mods call, implemented over that shim and bridge. It plays the sam
 FerroLoom that Sinytra Connector's Forgified Fabric API plays for NeoForge: module by module,
 under Fabric API's published package and class names, so a mod cannot tell the difference.
 
-It is a **builtin mod**: Fabric Loader sees it as `fabric-api` version `26.3-ferro.1`, so a mod's
-`depends: fabric-api` resolves without the jar being copied into the mods folder. FerroLoom's
-provider adds `ferrofabric-api-26.3-ferro.1.jar` to Knot's class path through `-Dferro.apiJar`
-and lists it in `getBuiltinMods`.
+It is a **builtin mod**: Fabric Loader sees it as `fabric-api` version `26.3-ferro.1`, and each
+implemented module id is its own builtin mod (from `META-INF/ferrofabric/modules.json`), so a
+mod's `depends: fabric-api` or `depends: fabric-lifecycle-events-v1` resolves without the jar being
+copied into the mods folder. FerroLoom's provider adds `ferrofabric-api-26.3-ferro.1.jar` to Knot's
+class path through `-Dferro.apiJar` and lists the builtins in `getBuiltinMods`.
 
 ## Modules
 
 | Module | Classes | What it does |
 |---|---|---|
-| `fabric-event` | `Event<T>` | `register(T)` as upstream, plus `dispatch(Consumer<T>)` for the owning module. A failing listener is logged; the rest still run. |
+| `fabric-api-base` | `Event`, `EventFactory`, `TriState`, `EventResult` | The real event system: `invoker()`, `register(T)`, phases and `addPhaseOrdering`, ported from Fabric API. |
 | `fabric-key-binding-api-v1` | `KeyMappingHelper` | Registers a `KeyMapping` with the engine's `Registrar`: the key appears in Options > Controls, can be rebound, and the engine polls the player's binding. |
-| `fabric-lifecycle-events-v1` | `ClientTickEvents.END_CLIENT_TICK` | Fired from the engine's client tick, after the pushed key state. |
+| `fabric-lifecycle-events-v1` | `ClientTickEvents` | START/END client tick and level tick, fired from the engine's client tick after the pushed key state. |
 
 The full Fabric API fork is the roadmap. A module enters when a target mod needs it and its
 classes compile against the shim; what is missing is listed in

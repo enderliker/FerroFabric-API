@@ -27,8 +27,10 @@ this API, whose classes are what a Fabric mod calls.
   jars on the parent class path and filters the game-facing jars out of it: the shim (by game
   classes) and this API (by its `-Dferro.apiJar` path) are defined by Knot.
 - The API jar is not in the mods folder. The provider adds it to Knot from `-Dferro.apiJar` and
-  registers it as a `BuiltinMod` (`fabric-api`, `26.3-ferro.1`), so dependency resolution sees it
-  and Fabric Loader does not scan it twice.
+  registers one `BuiltinMod` per id: `fabric-api` plus every module in
+  `META-INF/ferrofabric/modules.json`, all version `26.3-ferro.1`. Separate builtins, not one
+  `provides` list: Fabric Loader groups a builtin under every provided id and preselects it once
+  per id, which the resolver reports as a duplicate.
 
 ## Registration window
 

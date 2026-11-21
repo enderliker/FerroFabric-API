@@ -13,12 +13,14 @@ val ferroRepo = file(
 )
 val runtimeJar = ferroRepo.resolve("java/ferroloom-runtime/build/libs/ferroloom-runtime.jar")
 val shimJar = ferroRepo.resolve("java/ferroloom-shim/build/libs/ferroloom-shim.jar")
+// Brigadier 1.3.11 is the command library the 26.3 game lists (MIT).
+val brigadierJar = ferroRepo.resolve("java/.runtime/fabric/brigadier.jar")
 
 repositories { mavenCentral() }
 
 dependencies {
-    compileOnly(files(runtimeJar, shimJar))
-    testImplementation(files(runtimeJar, shimJar))
+    compileOnly(files(runtimeJar, shimJar, brigadierJar))
+    testImplementation(files(runtimeJar, shimJar, brigadierJar))
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
