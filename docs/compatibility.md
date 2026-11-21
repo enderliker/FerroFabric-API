@@ -43,4 +43,4 @@ FerroLoom's design §6.1 and §6.8; the full fork is Plan 4.
 
 | Mod | Version | Modules it needs | Works |
 |---|---|---|---|
-| ZoomX | 26.3 | key-binding, lifecycle | Yes: key registered, `Camera.calculateFov` mixin on the live FOV path, `fov_modifier` 1.0 → 0.3333 |
+| ZoomX | 26.3 | key-binding, lifecycle | Yes, key and FOV: the key registers, the `Camera.calculateFov` mixin is on the live FOV path, and `fov_modifier` goes 1.0 → 0.3333. Its `MouseHandler.onScroll` and `ItemInHandRenderer.submitHandsWithItems` mixins are inert: the engine calls neither method (no call site). Scroll zoom and hiding the hands do nothing; the key zoom works. |

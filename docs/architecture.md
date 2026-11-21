@@ -23,8 +23,9 @@ this API, whose classes are what a Fabric mod calls.
 - **Knot** defines the game-facing jars: the shim and FerroFabric-API. Mixin can transform the
   shim, and a mod sees both with one class identity.
 - **The parent class loader** keeps Fabric Loader, its libraries, FerroLoom's loader and its
-  runtime (`dev.ferroloom.api`, `FerroRuntime`, `FerroNative`). FerroLoom's provider filters these
-  jars out of Knot's valid parent class path, and filters the shim and this API in.
+  runtime (`dev.ferroloom.api`, `FerroRuntime`, `FerroNative`). FerroLoom's provider keeps those
+  jars on the parent class path and filters the game-facing jars out of it: the shim (by game
+  classes) and this API (by its `-Dferro.apiJar` path) are defined by Knot.
 - The API jar is not in the mods folder. The provider adds it to Knot from `-Dferro.apiJar` and
   registers it as a `BuiltinMod` (`fabric-api`, `26.3-ferro.1`), so dependency resolution sees it
   and Fabric Loader does not scan it twice.
@@ -45,10 +46,10 @@ the FerroLoom mod id and polls `ClientHost::is_down("ferroloom", "<mod>_<key>")`
 ## Events
 
 `ClientTickEvents.END_CLIENT_TICK` is fired from `FerroFabricApi.init`'s listener on
-`FerroEvents.TICKS`. FerroLoom's `GameBridge.onTick` pushes the player position and the key state,
-then dispatches the tick on the bridge thread inside a callback window; the API fires the Fabric
-event there. A listener that throws is logged and removed by FerroLoom's dispatcher, and the other
-listeners still run.
+`FerroEvents.TICKS`. FerroLoom's `GameBridge.onTick` pushes the player position, then dispatches
+the tick inside a callback window; Rust's key dispatch reads the engine and calls
+`GameBridge.onKey`, which records the key state before that tick. The API fires the Fabric event
+inside the window. `Event.dispatch` catches a throwing listener, logs it and runs the rest.
 
 ## Key state
 
