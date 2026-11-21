@@ -18,7 +18,8 @@ First release, with the modules FerroLoom Plan 3 needs to run an unmodified thir
   the engine's `Registrar` (translation key to `<mod>_<key>`, 26.3 SDL/HID scancode to a Horizon
   key name). The key is rebindable in Options > Controls.
 - `fabric-lifecycle-events-v1`: `ClientTickEvents` with START/END client tick and level tick,
-  fired from the engine's client tick after the key state is pushed.
+  `ClientLifecycleEvents` (CLIENT_STARTED/CLIENT_STOPPING) and `ClientLevelEvents`
+  (AFTER_CLIENT_LEVEL_CHANGE), fired from the engine's client hooks.
 - `dev.ferroloom.fabric.impl.FerroFabricApi.init`, the bridge FerroLoom calls after Knot starts.
 - The jar is labelled `fabric-api` `26.3-ferro.1` when FerroLoom adds it as a builtin mod, and each module id in `META-INF/ferrofabric/modules.json` is a builtin mod of its own.
 - JUnit tests for event dispatch, key registration and the engine tick forwarder.

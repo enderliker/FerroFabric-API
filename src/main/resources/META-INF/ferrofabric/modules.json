@@ -1,5 +1,6 @@
 {
   "modules": [
-    "fabric-api-base"
+    "fabric-api-base",
+    "fabric-lifecycle-events-v1"
   ]
 }
