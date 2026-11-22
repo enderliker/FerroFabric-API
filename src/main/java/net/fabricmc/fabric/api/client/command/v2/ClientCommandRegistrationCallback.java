@@ -20,6 +20,8 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandBuildContext;
 
+import dev.ferroloom.fabric.impl.Failures;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -27,7 +29,8 @@ import net.fabricmc.fabric.api.event.EventFactory;
 public interface ClientCommandRegistrationCallback {
 	Event<ClientCommandRegistrationCallback> EVENT = EventFactory.createArrayBacked(ClientCommandRegistrationCallback.class, (callbacks) -> (dispatcher, buildContext) -> {
 		for (ClientCommandRegistrationCallback callback : callbacks) {
-			callback.register(dispatcher, buildContext);
+			Failures.run("ClientCommandRegistrationCallback",
+					() -> callback.register(dispatcher, buildContext));
 		}
 	});
 

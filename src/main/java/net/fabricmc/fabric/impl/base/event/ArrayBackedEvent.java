@@ -73,7 +73,7 @@ class ArrayBackedEvent<T> extends Event<T> {
 			sortedPhases.add(phase);
 
 			if (sortIfCreate) {
-				NodeSorting.sort(sortedPhases, "event phases", Comparator.comparing(data -> data.id));
+				NodeSorting.sort(sortedPhases, "event phases", Comparator.comparing(data -> data.id.toString()));
 			}
 		}
 
@@ -112,7 +112,7 @@ class ArrayBackedEvent<T> extends Event<T> {
 			EventPhaseData<T> first = getOrCreatePhase(firstPhase, false);
 			EventPhaseData<T> second = getOrCreatePhase(secondPhase, false);
 			EventPhaseData.link(first, second);
-			NodeSorting.sort(this.sortedPhases, "event phases", Comparator.comparing(data -> data.id));
+			NodeSorting.sort(this.sortedPhases, "event phases", Comparator.comparing(data -> data.id.toString()));
 			rebuildInvoker(handlers.length);
 		}
 	}

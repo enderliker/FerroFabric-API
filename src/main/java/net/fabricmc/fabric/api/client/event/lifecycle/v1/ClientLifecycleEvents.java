@@ -21,6 +21,8 @@ import net.minecraft.client.Minecraft;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
+import dev.ferroloom.fabric.impl.Failures;
+
 public final class ClientLifecycleEvents {
 	private ClientLifecycleEvents() {
 	}
@@ -29,7 +31,7 @@ public final class ClientLifecycleEvents {
 	public static final Event<ClientStarted> CLIENT_STARTED = EventFactory.createArrayBacked(ClientStarted.class,
 			callbacks -> client -> {
 				for (ClientStarted callback : callbacks) {
-					callback.onClientStarted(client);
+					Failures.run("ClientLifecycleEvents.CLIENT_STARTED", () -> callback.onClientStarted(client));
 				}
 			});
 
@@ -37,7 +39,7 @@ public final class ClientLifecycleEvents {
 	public static final Event<ClientStopping> CLIENT_STOPPING = EventFactory.createArrayBacked(ClientStopping.class,
 			callbacks -> client -> {
 				for (ClientStopping callback : callbacks) {
-					callback.onClientStopping(client);
+					Failures.run("ClientLifecycleEvents.CLIENT_STOPPING", () -> callback.onClientStopping(client));
 				}
 			});
 

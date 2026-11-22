@@ -21,6 +21,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import dev.ferroloom.api.FerroApi;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -37,7 +39,13 @@ public interface UseItemCallback {
 	Event<UseItemCallback> EVENT = EventFactory.createArrayBacked(UseItemCallback.class,
 			listeners -> (player, level, hand) -> {
 				for (UseItemCallback event : listeners) {
-					InteractionResult result = event.interact(player, level, hand);
+					InteractionResult result;
+					try {
+						result = event.interact(player, level, hand);
+					} catch (Throwable failure) {
+						FerroApi.log("UseItemCallback listener failed: " + failure);
+						continue;
+					}
 
 					if (result != InteractionResult.PASS) {
 						return result;

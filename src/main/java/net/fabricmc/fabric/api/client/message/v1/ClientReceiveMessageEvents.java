@@ -26,6 +26,9 @@ import net.minecraft.network.chat.ChatType$Bound;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 
+import dev.ferroloom.api.FerroApi;
+import dev.ferroloom.fabric.impl.Failures;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -41,7 +44,11 @@ public final class ClientReceiveMessageEvents {
 			listeners -> (message, playerChatMessage, sender, boundChatType, timeStamp) -> {
 				boolean allow = true;
 				for (AllowChat listener : listeners) {
-					allow &= listener.allowReceiveChatMessage(message, playerChatMessage, sender, boundChatType, timeStamp);
+					try {
+						allow &= listener.allowReceiveChatMessage(message, playerChatMessage, sender, boundChatType, timeStamp);
+					} catch (Throwable failure) {
+						FerroApi.log("ClientReceiveMessageEvents.ALLOW_CHAT listener failed: " + failure);
+					}
 				}
 				return allow;
 			});
@@ -50,7 +57,11 @@ public final class ClientReceiveMessageEvents {
 			listeners -> (message, overlay) -> {
 				boolean allow = true;
 				for (AllowGame listener : listeners) {
-					allow &= listener.allowReceiveGameMessage(message, overlay);
+					try {
+						allow &= listener.allowReceiveGameMessage(message, overlay);
+					} catch (Throwable failure) {
+						FerroApi.log("ClientReceiveMessageEvents.ALLOW_GAME listener failed: " + failure);
+					}
 				}
 				return allow;
 			});
@@ -58,7 +69,11 @@ public final class ClientReceiveMessageEvents {
 	public static final Event<ModifyGame> MODIFY_GAME = EventFactory.createArrayBacked(ModifyGame.class,
 			listeners -> (message, overlay) -> {
 				for (ModifyGame listener : listeners) {
-					message = listener.modifyReceivedGameMessage(message, overlay);
+					try {
+						message = listener.modifyReceivedGameMessage(message, overlay);
+					} catch (Throwable failure) {
+						FerroApi.log("ClientReceiveMessageEvents.MODIFY_GAME listener failed: " + failure);
+					}
 				}
 				return message;
 			});
@@ -66,28 +81,33 @@ public final class ClientReceiveMessageEvents {
 	public static final Event<Chat> CHAT = EventFactory.createArrayBacked(Chat.class,
 			listeners -> (message, playerChatMessage, sender, boundChatType, timeStamp) -> {
 				for (Chat listener : listeners) {
-					listener.onReceiveChatMessage(message, playerChatMessage, sender, boundChatType, timeStamp);
+					Failures.run("ClientReceiveMessageEvents.CHAT", () -> listener.onReceiveChatMessage(
+							message, playerChatMessage, sender, boundChatType, timeStamp));
 				}
 			});
 
 	public static final Event<Game> GAME = EventFactory.createArrayBacked(Game.class,
 			listeners -> (message, overlay) -> {
 				for (Game listener : listeners) {
-					listener.onReceiveGameMessage(message, overlay);
+					Failures.run("ClientReceiveMessageEvents.GAME",
+							() -> listener.onReceiveGameMessage(message, overlay));
 				}
 			});
 
 	public static final Event<ChatCanceled> CHAT_CANCELED = EventFactory.createArrayBacked(ChatCanceled.class,
 			listeners -> (message, playerChatMessage, sender, boundChatType, timeStamp) -> {
 				for (ChatCanceled listener : listeners) {
-					listener.onReceiveChatMessageCanceled(message, playerChatMessage, sender, boundChatType, timeStamp);
+					Failures.run("ClientReceiveMessageEvents.CHAT_CANCELED",
+							() -> listener.onReceiveChatMessageCanceled(
+									message, playerChatMessage, sender, boundChatType, timeStamp));
 				}
 			});
 
 	public static final Event<GameCanceled> GAME_CANCELED = EventFactory.createArrayBacked(GameCanceled.class,
 			listeners -> (message, overlay) -> {
 				for (GameCanceled listener : listeners) {
-					listener.onReceiveGameMessageCanceled(message, overlay);
+					Failures.run("ClientReceiveMessageEvents.GAME_CANCELED",
+							() -> listener.onReceiveGameMessageCanceled(message, overlay));
 				}
 			});
 

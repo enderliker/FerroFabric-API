@@ -23,6 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 
+import dev.ferroloom.api.FerroApi;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -42,7 +44,13 @@ public interface UseEntityCallback {
 	Event<UseEntityCallback> EVENT = EventFactory.createArrayBacked(UseEntityCallback.class,
 			(listeners) -> (player, level, hand, entity, hitResult) -> {
 				for (UseEntityCallback event : listeners) {
-					InteractionResult result = event.interact(player, level, hand, entity, hitResult);
+					InteractionResult result;
+					try {
+						result = event.interact(player, level, hand, entity, hitResult);
+					} catch (Throwable failure) {
+						FerroApi.log("UseEntityCallback listener failed: " + failure);
+						continue;
+					}
 
 					if (result != InteractionResult.PASS) {
 						return result;

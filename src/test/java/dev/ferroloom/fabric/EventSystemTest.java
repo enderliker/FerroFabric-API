@@ -51,6 +51,35 @@ class EventSystemTest {
     }
 
     @Test
+    void phases_without_an_ordering_still_register_and_run_in_identifier_order() {
+        List<String> seen = new ArrayList<>();
+        Event<Listener> event = arrayBacked(seen);
+        event.register(Identifier.fromNamespaceAndPath("test", "b"), () -> seen.add("b"));
+        event.register(Identifier.fromNamespaceAndPath("test", "a"), () -> seen.add("a"));
+
+        event.invoker().run();
+
+        assertEquals(List.of("a", "b"), seen);
+    }
+
+    @Test
+    void a_third_phase_not_linked_to_an_ordered_pair_still_registers() {
+        List<String> seen = new ArrayList<>();
+        Event<Listener> event = arrayBacked(seen);
+        Identifier first = Identifier.fromNamespaceAndPath("test", "first");
+        Identifier second = Identifier.fromNamespaceAndPath("test", "second");
+        Identifier third = Identifier.fromNamespaceAndPath("test", "third");
+        event.addPhaseOrdering(second, third);
+        event.register(third, () -> seen.add("third"));
+        event.register(first, () -> seen.add("first"));
+        event.register(second, () -> seen.add("second"));
+
+        event.invoker().run();
+
+        assertEquals(List.of("first", "second", "third"), seen);
+    }
+
+    @Test
     void an_event_with_no_listener_has_an_invoker_that_does_nothing() {
         List<String> seen = new ArrayList<>();
         arrayBacked(seen).invoker().run();

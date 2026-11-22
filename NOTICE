@@ -13,3 +13,7 @@ licensed under the Apache License, Version 2.0.
 
 FerroLoom (https://github.com/enderliker/FerroLoom) is a separate work
 licensed under the MIT License; this project is loaded by it at runtime.
+
+Brigadier 1.3.11 (https://github.com/Mojang/brigadier), MIT, Copyright (c)
+Microsoft Corporation, is the command library this project links against and
+FerroLoom stages with it.

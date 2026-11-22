@@ -12,7 +12,8 @@ import net.minecraft.network.chat.Component;
 public final class ClientCommandSource implements FabricClientCommandSource {
 	@Override
 	public void sendFeedback(Component message) {
-		FerroApi.sendChat(message == null ? "" : message.getString());
+		// Upstream feedback is local; send_chat would transmit it to the server as chat.
+		FerroApi.chatLine(message == null ? "" : message.getString());
 	}
 
 	@Override

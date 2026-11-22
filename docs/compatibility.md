@@ -12,7 +12,7 @@ this page is the API's view.
 | `fabric-api-base` | `Event`, `EventFactory`, `AutoInvokingEvent`, `TriState`, `EventResult`, `BooleanFunction`, `NbtType` | The real event system: `invoker()`, `register(T)`, phases and `addPhaseOrdering`, adapted from Fabric API. A throwing listener is logged and the others still run. |
 | `fabric-key-binding-api-v1` | `net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper` | `registerKeyMapping` registers with the engine's `Registrar` and throws on a duplicate; `getBoundKeyOf` returns the player's Controls binding, pushed by the engine each tick. |
 | `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE, fired from the engine hooks. |
-| `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. |
+| `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. **The command-send events (`ALLOW_COMMAND`, `MODIFY_COMMAND`, `COMMAND`, `COMMAND_CANCELED`) never fire**: the engine raises `client_chat` only for chat, never for a line beginning with `/`, so a client command cannot be blocked or rewritten this way (the events remain present for source compatibility). |
 | `fabric-command-api-v2` | `ClientCommandRegistrationCallback`, `ClientCommands`, `FabricClientCommandSource` | Client-side Brigadier commands. The dispatcher is built after the entrypoints; usages reach the engine, and an unknown command falls through to the server. |
 | `fabric-events-interaction-v0` | `UseBlockCallback`, `UseItemCallback`, `UseEntityCallback` | Client use/right-click callbacks. A non-PASS result cancels the engine's click; the attack callbacks are not present. |
 | `fabric-rendering-v1` (HUD part) | `HudElement`, `HudElementRegistry`, `VanillaHudElements` | HUD elements in FerroLoom's own layer; text, fills and gradients only. |
@@ -51,13 +51,18 @@ this page is the API's view.
    produced. The objects are minimal: the player and level come from the synthetic client, an
    `Entity` carries only its engine id, an `ItemStack` only its count (its item identity is not
    modelled), and a `BlockHitResult`'s location is the block centre with the clicked face.
-9. **The HUD is a single FerroLoom layer.** Horizon exposes one GUI layer to Java, so every HUD
+9. **Command sends are not observable.** The engine fires `client_chat` only for chat typed
+   in the chat screen; a `/` line goes straight to command dispatch and never reaches it, and
+   mod chat sent with `send_chat` raises no client event either. `ClientSendMessageEvents`' chat
+   half (ALLOW_CHAT, MODIFY_CHAT, CHAT) works; its command half is present for source
+   compatibility but inert until the engine exposes an outgoing-command hook.
+10. **The HUD is a single FerroLoom layer.** Horizon exposes one GUI layer to Java, so every HUD
    element draws in `ferroloom:hud`. The vanilla ids in `VanillaHudElements` are positions in a
    layer list the engine does not have: attaching before/after one falls back to the start/end of
    the order. `GuiGraphicsExtractor` models `guiWidth`, `guiHeight`, `fill`, `fillGradient`,
    `text` and `centeredText`; sprites, items, clipping and pose transforms throw. `Font.width` is
    approximated (6 GUI pixels per character), so centred text is slightly off.
-10. **Nested game types are named by their binary name in this project's source**
+11. **Nested game types are named by their binary name in this project's source**
    (`ChatType$Bound`). The generated shim omits the `InnerClasses` attribute, so Java cannot
    write `ChatType.Bound`; the compiled descriptor is the same.
 

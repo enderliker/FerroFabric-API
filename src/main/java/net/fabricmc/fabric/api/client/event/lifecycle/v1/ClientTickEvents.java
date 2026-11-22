@@ -22,6 +22,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
+import dev.ferroloom.fabric.impl.Failures;
+
 /**
  * The client tick events a mod subscribes to. FerroLoom fires them from the engine's client tick,
  * after the key state is pushed.
@@ -33,28 +35,28 @@ public final class ClientTickEvents {
 	public static final Event<StartTick> START_CLIENT_TICK = EventFactory.createArrayBacked(StartTick.class,
 			callbacks -> client -> {
 				for (StartTick event : callbacks) {
-					event.onStartTick(client);
+					Failures.run("ClientTickEvents.START_CLIENT_TICK", () -> event.onStartTick(client));
 				}
 			});
 
 	public static final Event<EndTick> END_CLIENT_TICK = EventFactory.createArrayBacked(EndTick.class,
 			callbacks -> client -> {
 				for (EndTick event : callbacks) {
-					event.onEndTick(client);
+					Failures.run("ClientTickEvents.END_CLIENT_TICK", () -> event.onEndTick(client));
 				}
 			});
 
 	public static final Event<StartLevelTick> START_LEVEL_TICK = EventFactory.createArrayBacked(StartLevelTick.class,
 			callbacks -> level -> {
 				for (StartLevelTick callback : callbacks) {
-					callback.onStartTick(level);
+					Failures.run("ClientTickEvents.START_LEVEL_TICK", () -> callback.onStartTick(level));
 				}
 			});
 
 	public static final Event<EndLevelTick> END_LEVEL_TICK = EventFactory.createArrayBacked(EndLevelTick.class,
 			callbacks -> level -> {
 				for (EndLevelTick callback : callbacks) {
-					callback.onEndTick(level);
+					Failures.run("ClientTickEvents.END_LEVEL_TICK", () -> callback.onEndTick(level));
 				}
 			});
 

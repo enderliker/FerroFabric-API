@@ -22,6 +22,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 
+import dev.ferroloom.api.FerroApi;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -38,7 +40,13 @@ public interface UseBlockCallback {
 	Event<UseBlockCallback> EVENT = EventFactory.createArrayBacked(UseBlockCallback.class,
 			(listeners) -> (player, level, hand, hitResult) -> {
 				for (UseBlockCallback event : listeners) {
-					InteractionResult result = event.interact(player, level, hand, hitResult);
+					InteractionResult result;
+					try {
+						result = event.interact(player, level, hand, hitResult);
+					} catch (Throwable failure) {
+						FerroApi.log("UseBlockCallback listener failed: " + failure);
+						continue;
+					}
 
 					if (result != InteractionResult.PASS) {
 						return result;

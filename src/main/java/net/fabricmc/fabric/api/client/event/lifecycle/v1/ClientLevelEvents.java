@@ -22,6 +22,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
+import dev.ferroloom.fabric.impl.Failures;
+
 public final class ClientLevelEvents {
 	private ClientLevelEvents() {
 	}
@@ -30,7 +32,8 @@ public final class ClientLevelEvents {
 	public static final Event<AfterClientLevelChange> AFTER_CLIENT_LEVEL_CHANGE =
 			EventFactory.createArrayBacked(AfterClientLevelChange.class, callbacks -> (client, level) -> {
 				for (AfterClientLevelChange callback : callbacks) {
-					callback.afterLevelChange(client, level);
+					Failures.run("ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE",
+							() -> callback.afterLevelChange(client, level));
 				}
 			});
 

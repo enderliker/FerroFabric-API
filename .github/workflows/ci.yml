@@ -30,9 +30,8 @@ jobs:
         env:
           FERROLOOM_REPO: ${{ github.workspace }}/FerroLoom
         run: ./build.sh
-      - name: FerroLoom integration (the builtin fabric-api through Knot)
+      - name: FerroLoom integration (every loader test against the builtin)
         working-directory: FerroLoom
         run: >-
           ./java/gradlew -p java :ferroloom-loader:test
-          --tests '*FabricApiIntegrationTest*'
           -PferroApiJar="$GITHUB_WORKSPACE/build/libs/ferrofabric-api-26.3-ferro.1.jar"

@@ -16,6 +16,9 @@
 
 package net.fabricmc.fabric.api.client.message.v1;
 
+import dev.ferroloom.api.FerroApi;
+import dev.ferroloom.fabric.impl.Failures;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
@@ -26,7 +29,11 @@ public final class ClientSendMessageEvents {
 	public static final Event<AllowChat> ALLOW_CHAT = EventFactory.createArrayBacked(AllowChat.class,
 			listeners -> message -> {
 				for (AllowChat listener : listeners) {
-					if (!listener.allowSendChatMessage(message)) return false;
+					try {
+						if (!listener.allowSendChatMessage(message)) return false;
+					} catch (Throwable failure) {
+						FerroApi.log("ClientSendMessageEvents.ALLOW_CHAT listener failed: " + failure);
+					}
 				}
 				return true;
 			});
@@ -34,7 +41,11 @@ public final class ClientSendMessageEvents {
 	public static final Event<AllowCommand> ALLOW_COMMAND = EventFactory.createArrayBacked(AllowCommand.class,
 			listeners -> command -> {
 				for (AllowCommand listener : listeners) {
-					if (!listener.allowSendCommandMessage(command)) return false;
+					try {
+						if (!listener.allowSendCommandMessage(command)) return false;
+					} catch (Throwable failure) {
+						FerroApi.log("ClientSendMessageEvents.ALLOW_COMMAND listener failed: " + failure);
+					}
 				}
 				return true;
 			});
@@ -42,7 +53,11 @@ public final class ClientSendMessageEvents {
 	public static final Event<ModifyChat> MODIFY_CHAT = EventFactory.createArrayBacked(ModifyChat.class,
 			listeners -> message -> {
 				for (ModifyChat listener : listeners) {
-					message = listener.modifySendChatMessage(message);
+					try {
+						message = listener.modifySendChatMessage(message);
+					} catch (Throwable failure) {
+						FerroApi.log("ClientSendMessageEvents.MODIFY_CHAT listener failed: " + failure);
+					}
 				}
 				return message;
 			});
@@ -50,29 +65,41 @@ public final class ClientSendMessageEvents {
 	public static final Event<ModifyCommand> MODIFY_COMMAND = EventFactory.createArrayBacked(ModifyCommand.class,
 			listeners -> command -> {
 				for (ModifyCommand listener : listeners) {
-					command = listener.modifySendCommandMessage(command);
+					try {
+						command = listener.modifySendCommandMessage(command);
+					} catch (Throwable failure) {
+						FerroApi.log("ClientSendMessageEvents.MODIFY_COMMAND listener failed: " + failure);
+					}
 				}
 				return command;
 			});
 
 	public static final Event<Chat> CHAT = EventFactory.createArrayBacked(Chat.class,
 			listeners -> message -> {
-				for (Chat listener : listeners) listener.onSendChatMessage(message);
+				for (Chat listener : listeners) {
+					Failures.run("ClientSendMessageEvents.CHAT", () -> listener.onSendChatMessage(message));
+				}
 			});
 
 	public static final Event<Command> COMMAND = EventFactory.createArrayBacked(Command.class,
 			listeners -> command -> {
-				for (Command listener : listeners) listener.onSendCommandMessage(command);
+				for (Command listener : listeners) {
+					Failures.run("ClientSendMessageEvents.COMMAND", () -> listener.onSendCommandMessage(command));
+				}
 			});
 
 	public static final Event<ChatCanceled> CHAT_CANCELED = EventFactory.createArrayBacked(ChatCanceled.class,
 			listeners -> message -> {
-				for (ChatCanceled listener : listeners) listener.onSendChatMessageCanceled(message);
+				for (ChatCanceled listener : listeners) {
+					Failures.run("ClientSendMessageEvents.CHAT_CANCELED", () -> listener.onSendChatMessageCanceled(message));
+				}
 			});
 
 	public static final Event<CommandCanceled> COMMAND_CANCELED = EventFactory.createArrayBacked(CommandCanceled.class,
 			listeners -> command -> {
-				for (CommandCanceled listener : listeners) listener.onSendCommandMessageCanceled(command);
+				for (CommandCanceled listener : listeners) {
+					Failures.run("ClientSendMessageEvents.COMMAND_CANCELED", () -> listener.onSendCommandMessageCanceled(command));
+				}
 			});
 
 	@FunctionalInterface
