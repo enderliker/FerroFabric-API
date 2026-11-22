@@ -1,10 +1,16 @@
 package dev.ferroloom.fabric.impl;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
 import dev.ferroloom.api.FerroEvents;
 import dev.ferroloom.shim.ShimImpl;
 import dev.ferroloom.shim.ShimRuntime;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -99,6 +105,43 @@ public final class FerroFabricApi {
                 .onReceiveChatMessage(message, playerMessage, null, bound, timeStamp);
     };
 
+    private static final FabricClientCommandSource COMMAND_SOURCE = new ClientCommandSource();
+
+    /**
+     * Builds the client dispatcher after the entrypoints registered their callbacks. The build
+     * context is null until a registry bridge exists; a command that needs it must say so.
+     */
+    private static final FerroEvents.CommandRegistrationListener REGISTER_COMMANDS = () -> {
+        CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
+        ClientCommandRegistrationCallback.EVENT.invoker().register(dispatcher, null);
+        ClientCommandInternals.setDispatcher(dispatcher);
+        return List.of(dispatcher.getAllUsage(dispatcher.getRoot(), COMMAND_SOURCE, false));
+    };
+
+    /**
+     * Runs the line through Brigadier first. An unknown command returns false so the engine can
+     * send it to the server, as a client does; a syntax error is reported to the player.
+     */
+    private static final FerroEvents.ClientCommandListener RUN_COMMAND = line -> {
+        CommandDispatcher<FabricClientCommandSource> dispatcher =
+                ClientCommandInternals.getActiveDispatcher();
+        if (dispatcher == null) {
+            return false;
+        }
+        String command = line.startsWith("/") ? line.substring(1) : line;
+        try {
+            dispatcher.execute(command, COMMAND_SOURCE);
+            return true;
+        } catch (CommandSyntaxException invalid) {
+            if (invalid.getType()
+                    == CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()) {
+                return false;
+            }
+            COMMAND_SOURCE.sendError(Component.literal(invalid.getMessage()));
+            return true;
+        }
+    };
+
     private FerroFabricApi() {}
 
     public static void init() {
@@ -111,6 +154,12 @@ public final class FerroFabricApi {
         }
         if (!FerroEvents.CHAT_RECEIVED.contains(FORWARD_RECEIVE)) {
             FerroEvents.onChatReceived(FORWARD_RECEIVE);
+        }
+        if (!FerroEvents.COMMAND_REGISTRATION.contains(REGISTER_COMMANDS)) {
+            FerroEvents.onRegisterCommands(REGISTER_COMMANDS);
+        }
+        if (!FerroEvents.CLIENT_COMMANDS.contains(RUN_COMMAND)) {
+            FerroEvents.onClientCommand(RUN_COMMAND);
         }
     }
 

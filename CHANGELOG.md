@@ -15,6 +15,11 @@ All notable changes to FerroFabric-API. The version number follows the FerroLoom
   text too (styles are lost).
 - The shim now models `Component`/`MutableComponent` (`literal`, `empty`, `getString`, `copy`,
   `append`), a minimal `PlayerChatMessage` and `ChatType.Bound`.
+- `fabric-command-api-v2`: `ClientCommandRegistrationCallback`, `ClientCommands` and
+  `FabricClientCommandSource` over the real Brigadier 1.3.11 dispatcher. FerroLoom builds the
+  dispatcher after the entrypoints, hands its usages to the engine's command list, and runs a
+  typed line through it before the engine sends an unknown command to the server. The build
+  context is null until a registry bridge exists, and feedback/errors become chat lines.
 
 ### Changed
 

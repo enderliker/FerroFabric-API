@@ -13,6 +13,7 @@ this page is the API's view.
 | `fabric-key-binding-api-v1` | `net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper` | `registerKeyMapping` registers with the engine's `Registrar` and throws on a duplicate; `getBoundKeyOf` returns the player's Controls binding, pushed by the engine each tick. |
 | `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE, fired from the engine hooks. |
 | `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. |
+| `fabric-command-api-v2` | `ClientCommandRegistrationCallback`, `ClientCommands`, `FabricClientCommandSource` | Client-side Brigadier commands. The dispatcher is built after the entrypoints; usages reach the engine, and an unknown command falls through to the server. |
 
 ## Behaviour differences that a mod can notice
 
@@ -36,7 +37,14 @@ this page is the API's view.
    `ChatType.Bound.chatType()` is null (the name is the registry name the engine reported).
    `MODIFY_GAME` returns text, so the replacement line loses the original styles. A line that
    starts with `/` uses the command events, as upstream's send path does.
-7. **Nested game types are named by their binary name in this project's source**
+7. **A client command gets a null build context.** `ClientCommandRegistrationCallback.register`
+   receives null instead of a `CommandBuildContext` until a registry bridge exists; a command that
+   reads it fails at the call. Feedback and errors become chat lines, and a command the dispatcher
+   does not know returns unhandled so the engine can send it to the server (a syntax error is
+   reported instead). `FabricClientCommandSource` models `sendFeedback`, `sendError`, `getClient`,
+   `getWorld`/`getLevel`, `getPlayer`, `getEntity`, `getMeta` and `attended`; the suggestion-provider
+   surface and the position/rotation helpers are not present yet.
+8. **Nested game types are named by their binary name in this project's source**
    (`ChatType$Bound`). The generated shim omits the `InnerClasses` attribute, so Java cannot
    write `ChatType.Bound`; the compiled descriptor is the same.
 
