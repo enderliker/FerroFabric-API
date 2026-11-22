@@ -15,6 +15,13 @@ All notable changes to FerroFabric-API. The version number follows the FerroLoom
   text too (styles are lost).
 - The shim now models `Component`/`MutableComponent` (`literal`, `empty`, `getString`, `copy`,
   `append`), a minimal `PlayerChatMessage` and `ChatType.Bound`.
+- `fabric-events-interaction-v0`: `UseBlockCallback`, `UseItemCallback` and
+  `UseEntityCallback`, fired from the engine's `right_click_block`, `right_click_item` and
+  `entity_interact` hooks on the client half. A result other than PASS cancels the click; the
+  objects are minimal (the player and level come from the synthetic client, an entity carries its
+  id, a stack its count) and the attack callbacks are not present.
+- The shim's generator can initialise static fields from an impl table, so 26.3's
+  `InteractionResult` constants and `ItemStack.EMPTY` are real singletons instead of nulls.
 - `fabric-command-api-v2`: `ClientCommandRegistrationCallback`, `ClientCommands` and
   `FabricClientCommandSource` over the real Brigadier 1.3.11 dispatcher. FerroLoom builds the
   dispatcher after the entrypoints, hands its usages to the engine's command list, and runs a

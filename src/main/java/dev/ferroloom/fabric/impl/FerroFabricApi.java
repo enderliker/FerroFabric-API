@@ -16,11 +16,20 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.ChatType$Bound;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 
 /**
  * The glue between FerroLoom's engine hooks and the API's events. FerroBootstrap calls these
@@ -142,6 +151,38 @@ public final class FerroFabricApi {
         }
     };
 
+    private static final FerroEvents.UseBlockListener USE_BLOCK =
+            (hand, x, y, z, faceX, faceY, faceZ, count) -> {
+                BlockHitResult hit = ShimImpl.blockHit(x, y, z, faceX, faceY, faceZ,
+                        x + 0.5, y + 0.5, z + 0.5);
+                InteractionResult result = UseBlockCallback.EVENT.invoker()
+                        .interact(player(), level(), ShimImpl.hand(hand), hit);
+                return ShimImpl.resultCode(result);
+            };
+
+    private static final FerroEvents.UseItemListener USE_ITEM = (hand, count) -> {
+        InteractionResult result = UseItemCallback.EVENT.invoker()
+                .interact(player(), level(), ShimImpl.hand(hand));
+        return ShimImpl.resultCode(result);
+    };
+
+    private static final FerroEvents.UseEntityListener USE_ENTITY = (hand, entityId, count) -> {
+        Entity entity = ShimImpl.entity(entityId);
+        EntityHitResult hit = ShimImpl.entityHit(entity);
+        InteractionResult result = UseEntityCallback.EVENT.invoker()
+                .interact(player(), level(), ShimImpl.hand(hand), entity, hit);
+        return ShimImpl.resultCode(result);
+    };
+
+    private static Player player() {
+        Minecraft client = Minecraft.getInstance();
+        return client == null ? null : client.player;
+    }
+
+    private static Level level() {
+        return ShimRuntime.level();
+    }
+
     private FerroFabricApi() {}
 
     public static void init() {
@@ -160,6 +201,15 @@ public final class FerroFabricApi {
         }
         if (!FerroEvents.CLIENT_COMMANDS.contains(RUN_COMMAND)) {
             FerroEvents.onClientCommand(RUN_COMMAND);
+        }
+        if (!FerroEvents.USE_BLOCK.contains(USE_BLOCK)) {
+            FerroEvents.onUseBlock(USE_BLOCK);
+        }
+        if (!FerroEvents.USE_ITEM.contains(USE_ITEM)) {
+            FerroEvents.onUseItem(USE_ITEM);
+        }
+        if (!FerroEvents.USE_ENTITY.contains(USE_ENTITY)) {
+            FerroEvents.onUseEntity(USE_ENTITY);
         }
     }
 

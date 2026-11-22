@@ -27,6 +27,7 @@ class path through `-Dferro.apiJar` and lists the builtins in `getBuiltinMods`.
 | `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE. Fired from the engine hooks after the pushed key state. |
 | `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send (allow/modify, chat and command) and receive (allow, modify game, chat/game notify) events, fired from the engine's chat hooks. Plain text only: styles are lost and the sender is null. |
 | `fabric-command-api-v2` | `ClientCommandRegistrationCallback`, `ClientCommands`, `FabricClientCommandSource` | Client-side Brigadier commands: their usages reach the engine's command list, and a typed line runs through the dispatcher before the engine sends it to the server. |
+| `fabric-events-interaction-v0` | `UseBlockCallback`, `UseItemCallback`, `UseEntityCallback` | Client use/right-click callbacks from the engine's interaction hooks: any result other than PASS cancels the engine's click. The attack callbacks need server-side hooks and are not present. |
 
 The full Fabric API fork is the roadmap. A module enters when a target mod needs it and its
 classes compile against the shim; what is missing is listed in

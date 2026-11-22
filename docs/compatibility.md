@@ -14,6 +14,7 @@ this page is the API's view.
 | `fabric-lifecycle-events-v1` | `ClientTickEvents`, `ClientLifecycleEvents`, `ClientLevelEvents` | START/END client and level tick; CLIENT_STARTED/STOPPING; AFTER_CLIENT_LEVEL_CHANGE, fired from the engine hooks. |
 | `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. |
 | `fabric-command-api-v2` | `ClientCommandRegistrationCallback`, `ClientCommands`, `FabricClientCommandSource` | Client-side Brigadier commands. The dispatcher is built after the entrypoints; usages reach the engine, and an unknown command falls through to the server. |
+| `fabric-events-interaction-v0` | `UseBlockCallback`, `UseItemCallback`, `UseEntityCallback` | Client use/right-click callbacks. A non-PASS result cancels the engine's click; the attack callbacks are not present. |
 
 ## Behaviour differences that a mod can notice
 
@@ -44,7 +45,12 @@ this page is the API's view.
    reported instead). `FabricClientCommandSource` models `sendFeedback`, `sendError`, `getClient`,
    `getWorld`/`getLevel`, `getPlayer`, `getEntity`, `getMeta` and `attended`; the suggestion-provider
    surface and the position/rotation helpers are not present yet.
-8. **Nested game types are named by their binary name in this project's source**
+8. **Interaction callbacks fire on the client half only.** FerroLoom is a client-only host, so a
+   both-side engine hook runs the Java listeners on its client side; a server-side answer is not
+   produced. The objects are minimal: the player and level come from the synthetic client, an
+   `Entity` carries only its engine id, an `ItemStack` only its count (its item identity is not
+   modelled), and a `BlockHitResult`'s location is the block centre with the clicked face.
+9. **Nested game types are named by their binary name in this project's source**
    (`ChatType$Bound`). The generated shim omits the `InnerClasses` attribute, so Java cannot
    write `ChatType.Bound`; the compiled descriptor is the same.
 
