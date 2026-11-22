@@ -15,6 +15,7 @@ this page is the API's view.
 | `fabric-message-api-v1` | `ClientSendMessageEvents`, `ClientReceiveMessageEvents` | Send and receive events from `client_chat` and `client_chat_received`. Plain text, null sender, no styles. |
 | `fabric-command-api-v2` | `ClientCommandRegistrationCallback`, `ClientCommands`, `FabricClientCommandSource` | Client-side Brigadier commands. The dispatcher is built after the entrypoints; usages reach the engine, and an unknown command falls through to the server. |
 | `fabric-events-interaction-v0` | `UseBlockCallback`, `UseItemCallback`, `UseEntityCallback` | Client use/right-click callbacks. A non-PASS result cancels the engine's click; the attack callbacks are not present. |
+| `fabric-rendering-v1` (HUD part) | `HudElement`, `HudElementRegistry`, `VanillaHudElements` | HUD elements in FerroLoom's own layer; text, fills and gradients only. |
 
 ## Behaviour differences that a mod can notice
 
@@ -50,7 +51,13 @@ this page is the API's view.
    produced. The objects are minimal: the player and level come from the synthetic client, an
    `Entity` carries only its engine id, an `ItemStack` only its count (its item identity is not
    modelled), and a `BlockHitResult`'s location is the block centre with the clicked face.
-9. **Nested game types are named by their binary name in this project's source**
+9. **The HUD is a single FerroLoom layer.** Horizon exposes one GUI layer to Java, so every HUD
+   element draws in `ferroloom:hud`. The vanilla ids in `VanillaHudElements` are positions in a
+   layer list the engine does not have: attaching before/after one falls back to the start/end of
+   the order. `GuiGraphicsExtractor` models `guiWidth`, `guiHeight`, `fill`, `fillGradient`,
+   `text` and `centeredText`; sprites, items, clipping and pose transforms throw. `Font.width` is
+   approximated (6 GUI pixels per character), so centred text is slightly off.
+10. **Nested game types are named by their binary name in this project's source**
    (`ChatType$Bound`). The generated shim omits the `InnerClasses` attribute, so Java cannot
    write `ChatType.Bound`; the compiled descriptor is the same.
 

@@ -3,6 +3,7 @@ package dev.ferroloom.fabric.impl;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import dev.ferroloom.api.FerroApi;
 import dev.ferroloom.api.FerroEvents;
 import dev.ferroloom.shim.ShimImpl;
 import dev.ferroloom.shim.ShimRuntime;
@@ -16,10 +17,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.ChatType$Bound;
 import net.minecraft.network.chat.Component;
@@ -174,6 +178,21 @@ public final class FerroFabricApi {
         return ShimImpl.resultCode(result);
     };
 
+    private static final FerroEvents.HudPresentListener HUD_PRESENT =
+            HudElementRegistryImpl::hasElements;
+
+    private static final FerroEvents.HudDrawListener HUD_DRAW = (width, height) -> {
+        GuiGraphicsExtractor graphics = ShimRuntime.graphics();
+        DeltaTracker delta = ShimRuntime.deltaTracker();
+        for (HudElement element : HudElementRegistryImpl.elements()) {
+            try {
+                element.extractRenderState(graphics, delta);
+            } catch (Throwable failure) {
+                FerroApi.log("hud element failed: " + failure);
+            }
+        }
+    };
+
     private static Player player() {
         Minecraft client = Minecraft.getInstance();
         return client == null ? null : client.player;
@@ -210,6 +229,12 @@ public final class FerroFabricApi {
         }
         if (!FerroEvents.USE_ENTITY.contains(USE_ENTITY)) {
             FerroEvents.onUseEntity(USE_ENTITY);
+        }
+        if (!FerroEvents.HUD_PRESENT.contains(HUD_PRESENT)) {
+            FerroEvents.onHudPresent(HUD_PRESENT);
+        }
+        if (!FerroEvents.HUD_DRAW.contains(HUD_DRAW)) {
+            FerroEvents.onHudDraw(HUD_DRAW);
         }
     }
 

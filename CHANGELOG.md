@@ -22,6 +22,10 @@ All notable changes to FerroFabric-API. The version number follows the FerroLoom
   id, a stack its count) and the attack callbacks are not present.
 - The shim's generator can initialise static fields from an impl table, so 26.3's
   `InteractionResult` constants and `ItemStack.EMPTY` are real singletons instead of nulls.
+- `fabric-rendering-v1` (HUD part): `HudElement`, `HudElementRegistry` and
+  `VanillaHudElements`, drawn in FerroLoom's `ferroloom:hud` layer through a modelled
+  `GuiGraphicsExtractor` (text, fills, gradients). The vanilla layer ids are positions only; a
+  `Font.width` approximation centres text, and sprites, items and clipping are not modelled.
 - `fabric-command-api-v2`: `ClientCommandRegistrationCallback`, `ClientCommands` and
   `FabricClientCommandSource` over the real Brigadier 1.3.11 dispatcher. FerroLoom builds the
   dispatcher after the entrypoints, hands its usages to the engine's command list, and runs a
