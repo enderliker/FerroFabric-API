@@ -32,6 +32,12 @@ All notable changes to FerroFabric-API. The version number follows the FerroLoom
   typed line through it before the engine sends an unknown command to the server. The build
   context is null until a registry bridge exists, and feedback/errors become chat lines.
 
+### Documentation
+
+- The compatibility page now carries the full support matrix (base vs gated, with the engine
+  capability each gated module needs) and a real-mod check with AppleSkin, which is refused by
+  the networking gate and has no live Java HUD call site.
+
 ### Changed
 
 - Nested game types are named by their binary name in the API source (`ChatType$Bound`), because
